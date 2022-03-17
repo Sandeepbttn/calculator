@@ -1,7 +1,7 @@
-import { useReducer } from "react";
+import { useReducer } from "react"
 import "./style.css"
-import DigitButton from "./DigitButton";
-import OperationButton from "./OperationButton";
+import DigitButton from "./DigitButton"
+import OperationButton from "./OperationButton"
 
 
 export  const ACTIONS = {
@@ -17,6 +17,7 @@ function reducer(state,{type, payload} ){
 
   switch(type){
 
+    // add action
     case ACTIONS.ADD:
     
     // while adding new number or next calcuation
@@ -34,18 +35,21 @@ function reducer(state,{type, payload} ){
     if(payload.digit ==="0" && state.currentOperand === "0") return state
 
     // taking care of . (period)
-    if(payload.digit ==="."  && state.currentOperand.includes("."))
-    return state
-
-  
+    if (payload.digit === "." && state.currentOperand.includes(".")) {
+      return state
+    }
       return {
         ...state,
         currentOperand: `${state.currentOperand || ""}${payload.digit}`
       }
 
+
+    //  clear action
       case ACTIONS.CLEAR:
         return {}
 
+
+        // operation action
       case ACTIONS.OPERATION:
 
       // when you tyoe nothing
@@ -77,7 +81,35 @@ function reducer(state,{type, payload} ){
           operation: payload.operation,
           currentOperand:null
         }
+     
 
+        // DELETE action
+        case ACTIONS.DELETE:
+          if(state.overwrite){
+            return{
+              ...state,
+              overwrite:false,
+              currentOperand:null
+            }
+          }
+
+          if(state.currentOperand == null) return state
+
+          if(state.currentOperand.length === 1){
+            return { 
+              ...state,
+               currentOperand: null
+              }
+          }
+
+          return {
+            ...state,
+            currentOperand: state.currentOperand.slice(0,-1)
+          }
+
+
+
+        // Evaluate action
         case ACTIONS.EVALUATE:
           if(
             state.operation == null || state.currentOperand == null || state.previousOperand==null
@@ -104,6 +136,7 @@ function evaluate({ currentOperand,previousOperand,operation}){
 
   const prev = parseFloat(previousOperand)
   const current = parseFloat(currentOperand)
+  
   if(isNaN(prev) || isNaN(current))
   return ""
 
@@ -143,7 +176,7 @@ function App() {
         </div>
 
         <button className='span-two' onClick={ ()=> dispatch({type: ACTIONS.CLEAR})}>AC</button>
-        <button>DEL</button>
+        <button onClick={()=> dispatch({type:ACTIONS.DELETE})}>DEL</button>
         <OperationButton operation="÷" dispatch={dispatch} />
       <DigitButton digit="1" dispatch={dispatch} />
       <DigitButton digit="2" dispatch={dispatch} />
