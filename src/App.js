@@ -18,6 +18,17 @@ function reducer(state,{type, payload} ){
   switch(type){
 
     case ACTIONS.ADD:
+    
+    // while adding new number or next calcuation
+    if(state.overwrite){
+
+      return{
+        ...state,
+        currentOperand: payload.digit,
+        overwrite: false,
+      }
+    }
+
 
     // taking care 0 edge case
     if(payload.digit ==="0" && state.currentOperand === "0") return state
@@ -26,6 +37,7 @@ function reducer(state,{type, payload} ){
     if(payload.digit ==="."  && state.currentOperand.includes("."))
     return state
 
+  
       return {
         ...state,
         currentOperand: `${state.currentOperand || ""}${payload.digit}`
@@ -35,11 +47,22 @@ function reducer(state,{type, payload} ){
         return {}
 
       case ACTIONS.OPERATION:
+
+      // when you tyoe nothing
         if(state.currentOperand == null && state.previousOperand == null){
           return state
         }
+      
+      // taking care of mistake operation or mistype
+    if(state.currentOperand == null){
+      return{
+       ...state,
+       operation:payload.operation,
+      } 
+     }
+ 
 
-        if(state.previousOperand ==null){
+       if(state.previousOperand ==null){
           return{
             ...state,
             operation: payload.operation,
@@ -54,6 +77,22 @@ function reducer(state,{type, payload} ){
           operation: payload.operation,
           currentOperand:null
         }
+
+        case ACTIONS.EVALUATE:
+          if(
+            state.operation == null || state.currentOperand == null || state.previousOperand==null
+          ){
+            return state
+          }
+
+          return {
+            ...state,
+           overwrite:true,
+           previousOperand:null,
+           operation:null,
+           currentOperand:evaluate(state),
+          }
+
   }
 
 }
@@ -120,7 +159,7 @@ function App() {
       <OperationButton operation="-" dispatch={dispatch} />
       <DigitButton digit="." dispatch={dispatch} />
       <DigitButton digit="0" dispatch={dispatch} />
-        <button className='span-two'>=</button>
+        <button className='span-two' onClick={()=> dispatch( { type:ACTIONS.EVALUATE } )}>=</button>
 
     </div>
 
